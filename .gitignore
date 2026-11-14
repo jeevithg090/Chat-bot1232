@@ -9,14 +9,23 @@ dist
 # Node dependencies
 node_modules
 
+# Test / tooling output
+coverage
+.eslintcache
+test-results
+playwright-report
+
 # Logs
 logs
 *.log
 
 # Misc
 .DS_Store
+Thumbs.db
 .fleet
 .idea
+.vscode/*
+!.vscode/extensions.json
 
 # Local env files
 .env
