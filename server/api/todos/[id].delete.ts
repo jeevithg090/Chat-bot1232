@@ -1,17 +1,16 @@
-import { serverSupabaseClient } from '#supabase/server'
+import type { Todo } from '../../../types/todo'
+import { parseTodoId } from '../../utils/assistant'
+import { toHttpError } from '../../utils/errors'
+import { useTodoStore } from '../../utils/services'
 
-export default defineEventHandler(async (event) => {
-  const id = event.context.params?.id
-  if (!id) {
-    return createError({ statusCode: 400, message: "Todo ID is required" })
+export default defineEventHandler(async (event): Promise<{ todo: Todo }> => {
+  try {
+    const id = parseTodoId(getRouterParam(event, 'id'))
+    const todo = await useTodoStore(event).remove(id)
+    if (!todo)
+      throw createError({ statusCode: 404, statusMessage: 'Not Found', message: 'Task not found.' })
+    return { todo }
+  } catch (error) {
+    throw toHttpError(error, 'Could not delete the task.')
   }
-
-  const client = await serverSupabaseClient(event)
-  const { error } = await client.from('todos').delete().eq('id', id)
-
-  if (error) {
-    return createError({ statusCode: 500, message: error.message })
-  }
-
-  return { message: "Todo deleted!", id: id }
 })
